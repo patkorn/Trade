@@ -220,12 +220,18 @@
          loss = 0;
          let lot = startLot;
          let orderDistance = 0;
-         let numOrders = 0;
+         let numOrders = 0; // ไม้แรกคือ 0, ไม้ที่สองคือ 1...
          
          // คำนวณผลรวมการติดลบของทุกไม้ที่เปิดแล้ว
          while(orderDistance <= currentPoints && numOrders < maxOrders) {
              loss += lot * (currentPoints - orderDistance); // 1 จุด XAUUSD = 1$ ต่อ 1.00 Lot
-             lot = parseFloat((lot * multiply).toFixed(2));
+             
+             // --- [แก้ลอจิก]: ไม้ที่ 1 กับ 2 ออก Lot เท่ากัน เริ่มคูณ Lot ตั้งแต่ไม้ที่ 3 ขึ้นไป ---
+             // numOrders = 0 คือตอนเปิดไม้ที่ 1, numOrders = 1 คือตอนเปิดไม้ที่ 2 (จะไม่คูณ)
+             if (numOrders >= 1) { 
+                 lot = parseFloat((lot * multiply).toFixed(2));
+             }
+             
              orderDistance += stepPoint;
              numOrders++;
          }
@@ -280,7 +286,11 @@
           <td>${totalLot.toFixed(2)}</td>
         </tr>`;
         tbody.innerHTML += row;
-        currentLot = parseFloat((currentLot * multiply).toFixed(2));
+        
+        // --- [แก้ลอจิก]: ไม้ที่ 1 กับ 2 ออก Lot เท่ากัน เริ่มคูณหลังจบไม้ที่ 2 เป็นต้นไป ---
+        if (i >= 2) {
+            currentLot = parseFloat((currentLot * multiply).toFixed(2));
+        }
       }
 
       document.getElementById('max-order-text').innerText = `รวม (Max ${maxOrders} ไม้)`;

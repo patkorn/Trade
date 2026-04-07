@@ -150,7 +150,7 @@
       <div class="stat"><span>TL Start:</span> <span>800 Pts</span></div>
       <div class="stat"><span>Start DDR:</span> <span>ไม้ที่ 4</span></div>
       <div class="stat"><span>Stop Loss:</span> <span>5%</span></div>
-      <div class="stat tolerance"><span style="color: #4caf50;">ทนลากได้สูงสุด:</span> <span id="cons-tol">0 Pts</span></div>
+      <div class="stat tolerance"><span style="color: #4caf50;">ทนลากได้ (จากไม้แรก):</span> <span id="cons-tol">0 Pts</span></div>
     </div>
 
     <div class="card balanced">
@@ -164,7 +164,7 @@
       <div class="stat"><span>TL Start:</span> <span>800 Pts</span></div>
       <div class="stat"><span>Start DDR:</span> <span>ไม้ที่ 4</span></div>
       <div class="stat"><span>Stop Loss:</span> <span>10%</span></div>
-      <div class="stat tolerance"><span style="color: #ff9800;">ทนลากได้สูงสุด:</span> <span id="bal-tol">0 Pts</span></div>
+      <div class="stat tolerance"><span style="color: #ff9800;">ทนลากได้ (จากไม้แรก):</span> <span id="bal-tol">0 Pts</span></div>
     </div>
 
     <div class="card aggressive">
@@ -178,7 +178,7 @@
       <div class="stat"><span>TL Start:</span> <span>500 Pts</span></div>
       <div class="stat"><span>Start DDR:</span> <span>ไม้ที่ 4</span></div>
       <div class="stat"><span>Stop Loss:</span> <span>20%</span></div>
-      <div class="stat tolerance"><span style="color: #f44336;">ทนลากได้สูงสุด:</span> <span id="agg-tol">0 Pts</span></div>
+      <div class="stat tolerance"><span style="color: #f44336;">ทนลากได้ (จากไม้แรก):</span> <span id="agg-tol">0 Pts</span></div>
     </div>
   </div>
 
@@ -199,7 +199,7 @@
       </tbody>
       <tfoot>
         <tr class="total-row">
-          <td>รวม (Max 10 ไม้)</td>
+          <td id="max-order-text">รวม (Max 10 ไม้)</td>
           <td>-</td>
           <td id="total-lot-display">0.00</td>
         </tr>
@@ -208,12 +208,12 @@
   </div>
 
   <script>
-    // ฟังก์ชันคำนวณระยะทนลาก (Tolerance Point)
+    // ฟังก์ชันคำนวณระยะทนลาก (Tolerance Point) - นับจากไม้แรก
     function calculateTolerance(equity, startLot, multiply, stepPoint, slPercent, maxOrders) {
       let slAmount = equity * (slPercent / 100);
       let currentPoints = 0;
       let loss = 0;
-      let stepSize = 10; // จำลองกราฟขยับทีละ 10 จุด
+      let stepSize = 1; // จำลองกราฟขยับทีละ 1 จุด เพื่อความแม่นยำสูงสุด
       
       while(loss < slAmount && currentPoints < 50000) { // Limit ไว้ที่ 50000 จุดกันระบบค้าง
          currentPoints += stepSize;
@@ -283,6 +283,7 @@
         currentLot = parseFloat((currentLot * multiply).toFixed(2));
       }
 
+      document.getElementById('max-order-text').innerText = `รวม (Max ${maxOrders} ไม้)`;
       document.getElementById('total-lot-display').innerText = totalLot.toFixed(2);
       document.getElementById('grid-simulator').style.display = 'block';
     }

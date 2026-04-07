@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <title>PK | EA Trader- Money Management Calculator</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #121212;
+      color: #ffffff;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 600px;
+    }
+    
+    /* สไตล์สำหรับโลโก้แบรนด์ */
+    .brand-logo {
+      max-height: 80px; /* กำหนดความสูงสูงสุดของโลโก้ */
+      width: auto;      /* ปรับความกว้างตามสัดส่วนอัตโนมัติ */
+      margin-bottom: 15px; /* ระยะห่างระหว่างโลโก้กับชื่อเว็บ */
+      display: block;
+    }
+
+    .header h1 {
+      color: #00d2ff;
+      margin: 0 0 5px 0;
+      font-size: 28px;
+    }
+    .header p {
+      margin: 0;
+      color: #aaa;
+    }
+
+    .input-group {
+      background-color: #1e1e1e;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      margin-bottom: 30px;
+      text-align: center;
+      width: 100%;
+      max-width: 400px;
+      border: 1px solid #333;
+    }
+    label {
+      font-weight: bold;
+      color: #00d2ff;
+    }
+    input[type="number"] {
+      width: 80%;
+      padding: 12px;
+      font-size: 18px;
+      border: 2px solid #333;
+      border-radius: 5px;
+      background-color: #2a2a2a;
+      color: #fff;
+      text-align: center;
+      margin-top: 10px;
+      transition: 0.3s;
+    }
+    input[type="number"]:focus {
+      outline: none;
+      border-color: #00d2ff;
+    }
+    button {
+      margin-top: 20px;
+      padding: 12px 24px;
+      font-size: 16px;
+      background-color: #00d2ff;
+      color: #000;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    button:hover {
+      background-color: #0099cc;
+      box-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
+    }
+    .results-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      width: 100%;
+      max-width: 1000px;
+    }
+    .card {
+      background-color: #1e1e1e;
+      border-radius: 10px;
+      padding: 20px;
+      flex: 1;
+      min-width: 250px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      border-top: 5px solid #555;
+      border: 1px solid #333;
+    }
+    .card.conservative { border-top: 5px solid #4caf50; }
+    .card.balanced { border-top: 5px solid #ff9800; }
+    .card.aggressive { border-top: 5px solid #f44336; }
+    
+    .card h3 { margin-top: 0; text-align: center; }
+    .conservative h3 { color: #4caf50; }
+    .balanced h3 { color: #ff9800; }
+    .aggressive h3 { color: #f44336; }
+    
+    .stat {
+      display: flex;
+      justify-content: space-between;
+      margin: 10px 0;
+      padding-bottom: 5px;
+      border-bottom: 1px solid #333;
+    }
+    .highlight {
+      font-size: 32px;
+      font-weight: bold;
+      text-align: center;
+      margin: 15px 0;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <img src="https://cdn.jsdelivr.net/gh/patkorn/piclogo/PK_EA.png" alt="PK | EA System Logo" class="brand-logo">
+    
+    <h1>PK | EA System</h1>
+    <p>Money Management Calculator</p>
+  </div>
+
+  <div class="input-group">
+    <label for="equity">ระบุเงินทุน (Equity - USD)</label><br>
+    <input type="number" id="equity" placeholder="เช่น 5000" value="5000">
+    <br>
+    <button onclick="calculateMM()">คำนวณแผนการเทรด</button>
+  </div>
+
+  <div class="results-container">
+    <div class="card conservative">
+      <h3>🛡️ สายปลอดภัย (Conservative)</h3>
+      <div class="highlight" id="cons-lot">0.02</div>
+      <div style="text-align: center; font-size: 14px; margin-bottom: 15px; color: #aaa;">Start Lot</div>
+      <div class="stat"><span>Multiply:</span> <span>1.20</span></div>
+      <div class="stat"><span>Step Point:</span> <span>1,000</span></div>
+      <div class="stat"><span>Max Orders:</span> <span>8 - 10</span></div>
+      <div class="stat"><span>Stop Loss:</span> <span>5%</span></div>
+    </div>
+
+    <div class="card balanced">
+      <h3>⚖️ สายสมดุล (Balanced)</h3>
+      <div class="highlight" id="bal-lot" style="color: #ff9800;">0.05</div>
+      <div style="text-align: center; font-size: 14px; margin-bottom: 15px; color: #aaa;">Start Lot</div>
+      <div class="stat"><span>Multiply:</span> <span>1.20</span></div>
+      <div class="stat"><span>Step Point:</span> <span>800 - 1,000</span></div>
+      <div class="stat"><span>Max Orders:</span> <span>10 - 12</span></div>
+      <div class="stat"><span>Stop Loss:</span> <span>10%</span></div>
+    </div>
+
+    <div class="card aggressive">
+      <h3>🔥 สายซิ่ง (Aggressive)</h3>
+      <div class="highlight" id="agg-lot" style="color: #f44336;">0.10</div>
+      <div style="text-align: center; font-size: 14px; margin-bottom: 15px; color: #aaa;">Start Lot</div>
+      <div class="stat"><span>Multiply:</span> <span>1.25</span></div>
+      <div class="stat"><span>Step Point:</span> <span>500 - 800</span></div>
+      <div class="stat"><span>Max Orders:</span> <span>12 - 15</span></div>
+      <div class="stat"><span>Stop Loss:</span> <span>20%</span></div>
+    </div>
+  </div>
+
+  <script>
+    function calculateMM() {
+      const equityInput = document.getElementById('equity');
+      const equity = parseFloat(equityInput.value);
+      
+      if(isNaN(equity) || equity < 100) {
+        alert("กรุณาระบุเงินทุนขั้นต่ำ 500 USD ครับ");
+        return;
+      }
+
+      // สูตรคำนวณ (ขั้นต่ำ 0.01)
+      let lotCons = Math.max(0.01, (equity / 2500) * 0.01).toFixed(2);
+      let lotBal = Math.max(0.01, (equity / 1000) * 0.01).toFixed(2);
+      let lotAgg = Math.max(0.01, (equity / 500) * 0.01).toFixed(2);
+
+      // แสดงผล
+      document.getElementById('cons-lot').innerText = lotCons;
+      document.getElementById('bal-lot').innerText = lotBal;
+      document.getElementById('agg-lot').innerText = lotAgg;
+    }
+  </script>
+
+</body>
+</html>

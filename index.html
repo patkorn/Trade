@@ -3,7 +3,7 @@
 <head>
   <base target="_top">
   <meta charset="UTF-8">
-  <title>PK | EA Trader- Money Management Calculator</title>
+  <title>PK | EA - Jarvis System MM Calculator</title>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -18,21 +18,14 @@
     .header {
       text-align: center;
       margin-bottom: 30px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
       width: 100%;
       max-width: 600px;
     }
-    
-    /* สไตล์สำหรับโลโก้แบรนด์ */
     .brand-logo {
-      max-height: 80px; /* กำหนดความสูงสูงสุดของโลโก้ */
-      width: auto;      /* ปรับความกว้างตามสัดส่วนอัตโนมัติ */
-      margin-bottom: 15px; /* ระยะห่างระหว่างโลโก้กับชื่อเว็บ */
-      display: block;
+      max-height: 80px;
+      width: auto;
+      margin-bottom: 15px;
     }
-
     .header h1 {
       color: #00d2ff;
       margin: 0 0 5px 0;
@@ -42,7 +35,6 @@
       margin: 0;
       color: #aaa;
     }
-
     .input-group {
       background-color: #1e1e1e;
       padding: 20px;
@@ -54,10 +46,7 @@
       max-width: 400px;
       border: 1px solid #333;
     }
-    label {
-      font-weight: bold;
-      color: #00d2ff;
-    }
+    label { font-weight: bold; color: #00d2ff; }
     input[type="number"] {
       width: 80%;
       padding: 12px;
@@ -70,10 +59,7 @@
       margin-top: 10px;
       transition: 0.3s;
     }
-    input[type="number"]:focus {
-      outline: none;
-      border-color: #00d2ff;
-    }
+    input[type="number"]:focus { outline: none; border-color: #00d2ff; }
     button {
       margin-top: 20px;
       padding: 12px 24px;
@@ -86,7 +72,6 @@
       font-weight: bold;
       transition: 0.3s;
       text-transform: uppercase;
-      letter-spacing: 1px;
     }
     button:hover {
       background-color: #0099cc;
@@ -99,6 +84,7 @@
       justify-content: center;
       width: 100%;
       max-width: 1000px;
+      margin-bottom: 30px;
     }
     .card {
       background-color: #1e1e1e;
@@ -107,80 +93,101 @@
       flex: 1;
       min-width: 250px;
       box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-      border-top: 5px solid #555;
       border: 1px solid #333;
     }
     .card.conservative { border-top: 5px solid #4caf50; }
     .card.balanced { border-top: 5px solid #ff9800; }
     .card.aggressive { border-top: 5px solid #f44336; }
-    
     .card h3 { margin-top: 0; text-align: center; }
     .conservative h3 { color: #4caf50; }
     .balanced h3 { color: #ff9800; }
     .aggressive h3 { color: #f44336; }
+    .stat { display: flex; justify-content: space-between; margin: 10px 0; padding-bottom: 5px; border-bottom: 1px solid #333; }
+    .highlight { font-size: 32px; font-weight: bold; text-align: center; margin: 15px 0; color: #fff; }
     
-    .stat {
-      display: flex;
-      justify-content: space-between;
-      margin: 10px 0;
-      padding-bottom: 5px;
-      border-bottom: 1px solid #333;
+    /* สไตล์สำหรับตารางจำลองออเดอร์ */
+    .table-container {
+      background-color: #1e1e1e;
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid #333;
+      width: 100%;
+      max-width: 1000px;
+      display: none;
     }
-    .highlight {
-      font-size: 32px;
-      font-weight: bold;
-      text-align: center;
-      margin: 15px 0;
-      color: #fff;
-    }
+    .table-container h3 { color: #00d2ff; text-align: center; margin-top: 0; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { padding: 10px; text-align: center; border-bottom: 1px solid #333; }
+    th { background-color: #2a2a2a; color: #00d2ff; }
+    tr:hover { background-color: #252525; }
+    .total-row { font-weight: bold; color: #ff9800; background-color: #2a2a2a; }
   </style>
 </head>
 <body>
 
   <div class="header">
-    <img src="https://cdn.jsdelivr.net/gh/patkorn/piclogo/PK_EA.png" alt="PK | EA System Logo" class="brand-logo">
-    
-    <h1>PK | EA System</h1>
-    <p>Money Management Calculator</p>
+    <img src="logo.png" alt="PK | EA System Logo" class="brand-logo" onerror="this.style.display='none'">
+    <h1>PK | EA : Jarvis System</h1>
+    <p>Advanced MM & Grid Simulator</p>
   </div>
 
   <div class="input-group">
     <label for="equity">ระบุเงินทุน (Equity - USD)</label><br>
     <input type="number" id="equity" placeholder="เช่น 5000" value="5000">
     <br>
-    <button onclick="calculateMM()">คำนวณแผนการเทรด</button>
+    <button onclick="calculateMM()">วิเคราะห์ระบบ Jarvis</button>
   </div>
 
   <div class="results-container">
     <div class="card conservative">
-      <h3>🛡️ สายปลอดภัย (Conservative)</h3>
-      <div class="highlight" id="cons-lot">0.02</div>
+      <h3>🛡️ สายปลอดภัย</h3>
+      <div class="highlight" id="cons-lot">0.00</div>
       <div style="text-align: center; font-size: 14px; margin-bottom: 15px; color: #aaa;">Start Lot</div>
       <div class="stat"><span>Multiply:</span> <span>1.20</span></div>
-      <div class="stat"><span>Step Point:</span> <span>1,000</span></div>
-      <div class="stat"><span>Max Orders:</span> <span>8 - 10</span></div>
+      <div class="stat"><span>Step:</span> <span>1,000 Pts</span></div>
       <div class="stat"><span>Stop Loss:</span> <span>5%</span></div>
     </div>
-
     <div class="card balanced">
-      <h3>⚖️ สายสมดุล (Balanced)</h3>
-      <div class="highlight" id="bal-lot" style="color: #ff9800;">0.05</div>
+      <h3>⚖️ สายสมดุล</h3>
+      <div class="highlight" id="bal-lot" style="color: #ff9800;">0.00</div>
       <div style="text-align: center; font-size: 14px; margin-bottom: 15px; color: #aaa;">Start Lot</div>
       <div class="stat"><span>Multiply:</span> <span>1.20</span></div>
-      <div class="stat"><span>Step Point:</span> <span>800 - 1,000</span></div>
-      <div class="stat"><span>Max Orders:</span> <span>10 - 12</span></div>
+      <div class="stat"><span>Step:</span> <span>1,000 Pts</span></div>
       <div class="stat"><span>Stop Loss:</span> <span>10%</span></div>
     </div>
-
     <div class="card aggressive">
-      <h3>🔥 สายซิ่ง (Aggressive)</h3>
-      <div class="highlight" id="agg-lot" style="color: #f44336;">0.10</div>
+      <h3>🔥 สายซิ่ง</h3>
+      <div class="highlight" id="agg-lot" style="color: #f44336;">0.00</div>
       <div style="text-align: center; font-size: 14px; margin-bottom: 15px; color: #aaa;">Start Lot</div>
-      <div class="stat"><span>Multiply:</span> <span>1.25</span></div>
-      <div class="stat"><span>Step Point:</span> <span>500 - 800</span></div>
-      <div class="stat"><span>Max Orders:</span> <span>12 - 15</span></div>
+      <div class="stat"><span>Multiply:</span> <span>1.20</span></div>
+      <div class="stat"><span>Step:</span> <span>800 Pts</span></div>
       <div class="stat"><span>Stop Loss:</span> <span>20%</span></div>
     </div>
+  </div>
+
+  <div class="table-container" id="grid-simulator">
+    <h3>📊 จำลองการเปิดไม้แก้ (Jarvis System - สายสมดุล)</h3>
+    <p style="text-align: center; color: #aaa; font-size: 14px; margin-bottom: 20px;">
+      แสดงขนาด Lot หาก EA ต้องเปิดไม้แก้ตามระยะ Step ด้วย Multiplier 1.20
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>ออเดอร์ที่ (ไม้)</th>
+          <th>ขนาด Lot ที่เปิด</th>
+          <th>รวม Lot สะสมทั้งหมด</th>
+        </tr>
+      </thead>
+      <tbody id="sim-table-body">
+        </tbody>
+      <tfoot>
+        <tr class="total-row">
+          <td>รวม (Max 8 ไม้)</td>
+          <td>-</td>
+          <td id="total-lot-display">0.00</td>
+        </tr>
+      </tfoot>
+    </table>
   </div>
 
   <script>
@@ -189,20 +196,58 @@
       const equity = parseFloat(equityInput.value);
       
       if(isNaN(equity) || equity < 100) {
-        alert("กรุณาระบุเงินทุนขั้นต่ำ 500 USD ครับ");
+        alert("กรุณาระบุเงินทุนขั้นต่ำ 100 USD ครับ");
         return;
       }
 
-      // สูตรคำนวณ (ขั้นต่ำ 0.01)
-      let lotCons = Math.max(0.01, (equity / 2500) * 0.01).toFixed(2);
-      let lotBal = Math.max(0.01, (equity / 1000) * 0.01).toFixed(2);
-      let lotAgg = Math.max(0.01, (equity / 500) * 0.01).toFixed(2);
+      // คำนวณ Lot ทั้ง 3 สาย
+      let lotCons = Math.max(0.01, (equity / 2500) * 0.01);
+      let lotBal = Math.max(0.01, (equity / 1000) * 0.01);
+      let lotAgg = Math.max(0.01, (equity / 500) * 0.01);
 
-      // แสดงผล
-      document.getElementById('cons-lot').innerText = lotCons;
-      document.getElementById('bal-lot').innerText = lotBal;
-      document.getElementById('agg-lot').innerText = lotAgg;
+      // แสดงผล Lot
+      document.getElementById('cons-lot').innerText = lotCons.toFixed(2);
+      document.getElementById('bal-lot').innerText = lotBal.toFixed(2);
+      document.getElementById('agg-lot').innerText = lotAgg.toFixed(2);
+
+      // จำลองตาราง Grid Simulator (ใช้ข้อมูลของสายสมดุล)
+      generateSimulationTable(lotBal);
     }
+
+    function generateSimulationTable(startLot) {
+      const tbody = document.getElementById('sim-table-body');
+      tbody.innerHTML = ''; // เคลียร์ข้อมูลเก่า
+      
+      let currentLot = parseFloat(startLot.toFixed(2));
+      let totalLot = 0;
+      const multiplier = 1.20;
+      const maxOrders = 8;
+
+      for(let i = 1; i <= maxOrders; i++) {
+        // อัปเดต Lot สะสม
+        totalLot += currentLot;
+
+        // สร้างแถวในตาราง
+        let row = `<tr>
+          <td>ไม้ที่ ${i}</td>
+          <td>${currentLot.toFixed(2)}</td>
+          <td>${totalLot.toFixed(2)}</td>
+        </tr>`;
+        tbody.innerHTML += row;
+
+        // คำนวณ Lot ไม้ถัดไป
+        currentLot = parseFloat((currentLot * multiplier).toFixed(2));
+      }
+
+      // แสดงผลรวม
+      document.getElementById('total-lot-display').innerText = totalLot.toFixed(2);
+      
+      // แสดงตาราง
+      document.getElementById('grid-simulator').style.display = 'block';
+    }
+
+    // สั่งให้คำนวณทันทีเมื่อโหลดหน้าเว็บเสร็จ
+    window.onload = calculateMM;
   </script>
 
 </body>

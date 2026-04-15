@@ -52,15 +52,16 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.5);
       margin-bottom: 30px;
       width: 100%;
-      max-width: 500px;
+      max-width: 700px;
       border: 1px solid #333;
     }
     .input-box {
       flex: 1;
-      min-width: 200px;
+      min-width: 180px;
       text-align: center;
     }
     label { font-weight: bold; color: #00d2ff; font-size: 14px; }
+    .label-desc { font-size: 11px; color: #888; display: block; margin-top: 2px; }
     input[type="number"] {
       width: 90%;
       padding: 10px;
@@ -74,6 +75,11 @@
       transition: 0.3s;
     }
     input[type="number"]:focus { outline: none; border-color: #00d2ff; }
+    
+    /* เน้นช่อง Custom Lot ให้ต่างจากช่องอื่น */
+    #customLot { border-color: #ff9800; background-color: #2a2015; }
+    #customLot:focus { border-color: #ffb74d; }
+
     button.btn-primary {
       width: 100%;
       margin-top: 15px;
@@ -119,7 +125,9 @@
     .aggressive h3 { color: #f44336; }
     .stat { display: flex; justify-content: space-between; margin: 8px 0; padding-bottom: 5px; border-bottom: 1px dashed #333; font-size: 14px;}
     .stat.tolerance { border-bottom: none; margin-top: 15px; background-color: rgba(255, 255, 255, 0.05); padding: 10px; border-radius: 5px; font-weight: bold; }
-    .highlight { font-size: 32px; font-weight: bold; text-align: center; margin: 15px 0; color: #fff; }
+    .highlight { font-size: 32px; font-weight: bold; text-align: center; margin: 15px 0 5px 0; color: #fff; }
+    .lot-label { text-align: center; font-size: 12px; margin-bottom: 15px; color: #aaa; background-color: #333; padding: 4px; border-radius: 4px; display: inline-block; width: 100%; box-sizing: border-box;}
+    .lot-label.manual { background-color: #4a3311; color: #ffb74d; }
     
     .table-container {
       background-color: #1e1e1e;
@@ -148,55 +156,62 @@
 
   <div class="input-container">
     <div class="input-box">
-      <label for="equity">ระบุเงินทุน (Equity - USD)</label>
+      <label for="equity">ระบุเงินทุน (USD)</label>
+      <span class="label-desc">เงินทุนเริ่มต้น</span>
       <input type="number" id="equity" placeholder="เช่น 500" value="500">
     </div>
     <div class="input-box">
-      <label for="tolerance">เป้าหมายทนลาก (Points)</label>
+      <label for="tolerance">เป้าหมายทนลาก (Pts)</label>
+      <span class="label-desc">คำนวณออโต้ตามระยะ</span>
       <input type="number" id="tolerance" placeholder="เช่น 1000" value="1000">
     </div>
-    <button class="btn-primary" onclick="calculateMM()">วิเคราะห์และคำนวณ Lot ที่เหมาะสม</button>
+    <div class="input-box">
+      <label for="customLot" style="color: #ff9800;">ฟิกซ์ Lot เอง (ไม่บังคับ)</label>
+      <span class="label-desc" style="color: #cc7a00;">ปล่อยว่าง = ให้ออโต้ทำงาน</span>
+      <input type="number" id="customLot" placeholder="ตัวอย่าง: 0.05" step="0.01">
+    </div>
+    <button class="btn-primary" onclick="calculateMM()">วิเคราะห์และจำลองระบบ</button>
   </div>
 
   <div class="results-container">
     <div class="card conservative">
       <h3>🛡️ สายปลอดภัย</h3>
       <div class="highlight" id="cons-lot">0.00</div>
-      <div style="text-align: center; font-size: 14px; margin-bottom: 15px; color: #aaa;">Optimal Start Lot</div>
+      <div class="lot-label" id="cons-label">คำนวณจากเป้าทนลาก (ออโต้)</div>
       <div class="stat"><span>Multiply:</span> <span>1.2</span></div>
       <div class="stat"><span>Step Point:</span> <span>1,500 Pts</span></div>
       <div class="stat"><span>Max Orders:</span> <span>6 ไม้</span></div>
       <div class="stat"><span>Stop Loss:</span> <span>5%</span></div>
-      <div class="stat tolerance"><span style="color: #4caf50;">ทนลากได้จริง:</span> <span id="cons-tol">0 Pts</span></div>
+      <div class="stat tolerance"><span style="color: #4caf50;">ทนลากได้สูงสุดจริง:</span> <span id="cons-tol">0 Pts</span></div>
     </div>
 
     <div class="card balanced">
       <h3>⚖️ สายสมดุล</h3>
       <div class="highlight" id="bal-lot" style="color: #ff9800;">0.00</div>
-      <div style="text-align: center; font-size: 14px; margin-bottom: 15px; color: #aaa;">Optimal Start Lot</div>
+      <div class="lot-label" id="bal-label">คำนวณจากเป้าทนลาก (ออโต้)</div>
       <div class="stat"><span>Multiply:</span> <span>1.2</span></div>
       <div class="stat"><span>Step Point:</span> <span>1,000 Pts</span></div>
       <div class="stat"><span>Max Orders:</span> <span>8 ไม้</span></div>
       <div class="stat"><span>Stop Loss:</span> <span>10%</span></div>
-      <div class="stat tolerance"><span style="color: #ff9800;">ทนลากได้จริง:</span> <span id="bal-tol">0 Pts</span></div>
+      <div class="stat tolerance"><span style="color: #ff9800;">ทนลากได้สูงสุดจริง:</span> <span id="bal-tol">0 Pts</span></div>
     </div>
 
     <div class="card aggressive">
       <h3>🔥 สายซิ่ง</h3>
       <div class="highlight" id="agg-lot" style="color: #f44336;">0.00</div>
-      <div style="text-align: center; font-size: 14px; margin-bottom: 15px; color: #aaa;">Optimal Start Lot</div>
+      <div class="lot-label" id="agg-label">คำนวณจากเป้าทนลาก (ออโต้)</div>
       <div class="stat"><span>Multiply:</span> <span>1.3</span></div>
       <div class="stat"><span>Step Point:</span> <span>700 Pts</span></div>
       <div class="stat"><span>Max Orders:</span> <span>10 ไม้</span></div>
       <div class="stat"><span>Stop Loss:</span> <span>20%</span></div>
-      <div class="stat tolerance"><span style="color: #f44336;">ทนลากได้จริง:</span> <span id="agg-tol">0 Pts</span></div>
+      <div class="stat tolerance"><span style="color: #f44336;">ทนลากได้สูงสุดจริง:</span> <span id="agg-tol">0 Pts</span></div>
     </div>
   </div>
 
   <div class="table-container" id="grid-simulator">
-    <h3>📊 จำลองการเปิดไม้ (Jarvis System - สายสมดุล)</h3>
+    <h3>📊 จำลองตาราง Grid (อ้างอิงสายสมดุล)</h3>
     <p style="text-align: center; color: #aaa; font-size: 14px; margin-bottom: 20px;">
-      แสดงขนาด Lot หาก EA ต้องเปิดไม้แก้ตามระยะ Step Point ด้วย Lot ที่คำนวณได้
+      แสดงขนาด Lot หาก EA ต้องเปิดไม้แก้ตามระยะ Step Point ด้วย Lot ปัจจุบัน
     </p>
     <table>
       <thead>
@@ -220,7 +235,6 @@
   </div>
 
   <script>
-    // เพิ่ม Parameter 'roundingMode' เพื่อแยกวิธีการปัดเศษของแต่ละสาย
     function findOptimalLot(equity, targetTolerance, multiply, stepPoint, slPercent, maxOrders, roundingMode) {
       let slAmount = equity * (slPercent / 100);
       let lossMultiplier = 0;
@@ -242,13 +256,12 @@
       let optimalLot = slAmount / lossMultiplier;
       let finalLot;
       
-      // ปรับระบบปัดเศษตามความเสี่ยงของแต่ละสาย
       if (roundingMode === 'floor') {
-          finalLot = Math.floor(optimalLot * 100) / 100; // ปลอดภัย: ปัดลงเสมอ
+          finalLot = Math.floor(optimalLot * 100) / 100;
       } else if (roundingMode === 'ceil') {
-          finalLot = Math.ceil(optimalLot * 100) / 100;  // สายซิ่ง: ปัดขึ้นเสมอ
+          finalLot = Math.ceil(optimalLot * 100) / 100;
       } else {
-          finalLot = Math.round(optimalLot * 100) / 100; // สายสมดุล: ปัดตามจริง
+          finalLot = Math.round(optimalLot * 100) / 100;
       }
 
       return Math.max(0.01, finalLot);
@@ -270,7 +283,6 @@
          while(orderDistance <= currentPoints && numOrders < maxOrders) {
              loss += lot * (currentPoints - orderDistance); 
              if (numOrders >= 1) { 
-                 // จำลองการเบิ้ล Lot ด้วยทศนิยม 2 ตำแหน่ง
                  lot = parseFloat((lot * multiply).toFixed(2));
              }
              orderDistance += stepPoint;
@@ -283,20 +295,43 @@
     function calculateMM() {
       const equity = parseFloat(document.getElementById('equity').value);
       const targetTolerance = parseFloat(document.getElementById('tolerance').value);
+      const customLotInput = document.getElementById('customLot').value;
+      const customLot = parseFloat(customLotInput);
+      
+      const isManualLot = !isNaN(customLot) && customLot > 0;
       
       if(isNaN(equity) || equity < 100) {
         alert("กรุณาระบุเงินทุนให้ถูกต้องครับ");
         return;
       }
-      if(isNaN(targetTolerance) || targetTolerance < 500) {
-        alert("กรุณาระบุเป้าหมายระยะทนลากขั้นต่ำ 500 Pts ครับ");
+      if(!isManualLot && (isNaN(targetTolerance) || targetTolerance < 500)) {
+        alert("หากไม่กำหนด Lot เอง กรุณาระบุเป้าหมายระยะทนลากขั้นต่ำ 500 Pts ครับ");
         return;
       }
 
-      // ส่งโหมดการปัดเศษเข้าไป: floor(ปลอดภัย), round(สมดุล), ceil(ซิ่ง)
-      let lotCons = findOptimalLot(equity, targetTolerance, 1.2, 1500, 5, 6, 'floor');
-      let lotBal = findOptimalLot(equity, targetTolerance, 1.2, 1000, 10, 8, 'round');
-      let lotAgg = findOptimalLot(equity, targetTolerance, 1.3, 700, 20, 10, 'ceil');
+      let lotCons, lotBal, lotAgg;
+
+      if (isManualLot) {
+          lotCons = customLot;
+          lotBal = customLot;
+          lotAgg = customLot;
+          
+          const labels = document.querySelectorAll('.lot-label');
+          labels.forEach(label => {
+              label.innerText = "⭐ ฟิกซ์ Lot ตามผู้ใช้กำหนด";
+              label.classList.add('manual');
+          });
+      } else {
+          lotCons = findOptimalLot(equity, targetTolerance, 1.2, 1500, 5, 6, 'floor');
+          lotBal = findOptimalLot(equity, targetTolerance, 1.2, 1000, 10, 8, 'round');
+          lotAgg = findOptimalLot(equity, targetTolerance, 1.3, 700, 20, 10, 'ceil');
+          
+          const labels = document.querySelectorAll('.lot-label');
+          labels.forEach(label => {
+              label.innerText = "คำนวณจากเป้าทนลาก (ออโต้)";
+              label.classList.remove('manual');
+          });
+      }
 
       document.getElementById('cons-lot').innerText = lotCons.toFixed(2);
       document.getElementById('bal-lot').innerText = lotBal.toFixed(2);

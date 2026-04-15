@@ -41,33 +41,42 @@
       margin: 0;
       color: #aaa;
     }
-    .input-group {
+    .input-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
       background-color: #1e1e1e;
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.5);
       margin-bottom: 30px;
-      text-align: center;
       width: 100%;
-      max-width: 400px;
+      max-width: 500px;
       border: 1px solid #333;
     }
-    label { font-weight: bold; color: #00d2ff; }
+    .input-box {
+      flex: 1;
+      min-width: 200px;
+      text-align: center;
+    }
+    label { font-weight: bold; color: #00d2ff; font-size: 14px; }
     input[type="number"] {
-      width: 80%;
-      padding: 12px;
+      width: 90%;
+      padding: 10px;
       font-size: 18px;
       border: 2px solid #333;
       border-radius: 5px;
       background-color: #2a2a2a;
       color: #fff;
       text-align: center;
-      margin-top: 10px;
+      margin-top: 8px;
       transition: 0.3s;
     }
     input[type="number"]:focus { outline: none; border-color: #00d2ff; }
     button.btn-primary {
-      margin-top: 20px;
+      width: 100%;
+      margin-top: 15px;
       padding: 12px 24px;
       font-size: 16px;
       background-color: #00d2ff;
@@ -123,7 +132,7 @@
     }
     .table-container h3 { color: #00d2ff; text-align: center; margin-top: 0; }
     table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-    th, td { padding: 10px; text-align: center; border-bottom: 1px solid #333; }
+    th, td { padding: 10px; text-align: center; border-bottom: 1px solid #333; font-size: 14px; }
     th { background-color: #2a2a2a; color: #00d2ff; }
     tr:hover { background-color: #252525; }
     .total-row { font-weight: bold; color: #ff9800; background-color: #2a2a2a; }
@@ -137,75 +146,72 @@
     <p>Advanced MM & Grid Simulator</p>
   </div>
 
-  <div class="input-group">
-    <label for="equity">ระบุเงินทุน (Equity - USD)</label><br>
-    <input type="number" id="equity" placeholder="เช่น 500" value="500">
-    <br>
-    <button class="btn-primary" onclick="calculateMM()">วิเคราะห์ระบบ JARVIS</button>
+  <div class="input-container">
+    <div class="input-box">
+      <label for="equity">ระบุเงินทุน (Equity - USD)</label>
+      <input type="number" id="equity" placeholder="เช่น 500" value="500">
+    </div>
+    <div class="input-box">
+      <label for="tolerance">เป้าหมายทนลาก (Points)</label>
+      <input type="number" id="tolerance" placeholder="เช่น 3000" value="3000">
+    </div>
+    <button class="btn-primary" onclick="calculateMM()">วิเคราะห์และคำนวณ Lot ที่เหมาะสม</button>
   </div>
 
   <div class="results-container">
     <div class="card conservative">
       <h3>🛡️ สายปลอดภัย</h3>
       <div class="highlight" id="cons-lot">0.00</div>
-      <div style="text-align: center; font-size: 14px; margin-bottom: 15px; color: #aaa;">Start Lot</div>
+      <div style="text-align: center; font-size: 14px; margin-bottom: 15px; color: #aaa;">Optimal Start Lot</div>
       <div class="stat"><span>Multiply:</span> <span>1.20</span></div>
       <div class="stat"><span>Step Point:</span> <span>2,000 Pts</span></div>
       <div class="stat"><span>Max Orders:</span> <span>6 ไม้</span></div>
-      <div class="stat"><span>Main Order Point:</span> <span>1,400 Pts</span></div>
-      <div class="stat"><span>TL Start:</span> <span>800 Pts</span></div>
-      <div class="stat"><span>Start DDR:</span> <span>ไม้ที่ 4</span></div>
       <div class="stat"><span>Stop Loss:</span> <span>5%</span></div>
-      <div class="stat tolerance"><span style="color: #4caf50;">ทนลากได้ (จากไม้แรก):</span> <span id="cons-tol">0 Pts</span></div>
+      <div class="stat tolerance"><span style="color: #4caf50;">ทนลากได้จริง:</span> <span id="cons-tol">0 Pts</span></div>
     </div>
 
     <div class="card balanced">
       <h3>⚖️ สายสมดุล</h3>
       <div class="highlight" id="bal-lot" style="color: #ff9800;">0.00</div>
-      <div style="text-align: center; font-size: 14px; margin-bottom: 15px; color: #aaa;">Start Lot</div>
+      <div style="text-align: center; font-size: 14px; margin-bottom: 15px; color: #aaa;">Optimal Start Lot</div>
       <div class="stat"><span>Multiply:</span> <span>1.20</span></div>
       <div class="stat"><span>Step Point:</span> <span>1,500 Pts</span></div>
       <div class="stat"><span>Max Orders:</span> <span>8 ไม้</span></div>
-      <div class="stat"><span>Main Order Point:</span> <span>1,400 Pts</span></div>
-      <div class="stat"><span>TL Start:</span> <span>800 Pts</span></div>
-      <div class="stat"><span>Start DDR:</span> <span>ไม้ที่ 4</span></div>
       <div class="stat"><span>Stop Loss:</span> <span>10%</span></div>
-      <div class="stat tolerance"><span style="color: #ff9800;">ทนลากได้ (จากไม้แรก):</span> <span id="bal-tol">0 Pts</span></div>
+      <div class="stat tolerance"><span style="color: #ff9800;">ทนลากได้จริง:</span> <span id="bal-tol">0 Pts</span></div>
     </div>
 
     <div class="card aggressive">
       <h3>🔥 สายซิ่ง</h3>
       <div class="highlight" id="agg-lot" style="color: #f44336;">0.00</div>
-      <div style="text-align: center; font-size: 14px; margin-bottom: 15px; color: #aaa;">Start Lot</div>
+      <div style="text-align: center; font-size: 14px; margin-bottom: 15px; color: #aaa;">Optimal Start Lot</div>
       <div class="stat"><span>Multiply:</span> <span>1.25</span></div>
       <div class="stat"><span>Step Point:</span> <span>1,000 Pts</span></div>
       <div class="stat"><span>Max Orders:</span> <span>10 ไม้</span></div>
-      <div class="stat"><span>Main Order Point:</span> <span>1,000 Pts</span></div>
-      <div class="stat"><span>TL Start:</span> <span>500 Pts</span></div>
-      <div class="stat"><span>Start DDR:</span> <span>ไม้ที่ 4</span></div>
       <div class="stat"><span>Stop Loss:</span> <span>20%</span></div>
-      <div class="stat tolerance"><span style="color: #f44336;">ทนลากได้ (จากไม้แรก):</span> <span id="agg-tol">0 Pts</span></div>
+      <div class="stat tolerance"><span style="color: #f44336;">ทนลากได้จริง:</span> <span id="agg-tol">0 Pts</span></div>
     </div>
   </div>
 
   <div class="table-container" id="grid-simulator">
-    <h3>📊 จำลองการเปิดไม้แก้ (Jarvis System - สายสมดุล)</h3>
+    <h3>📊 จำลองการเปิดไม้ (Jarvis System - สายสมดุล)</h3>
     <p style="text-align: center; color: #aaa; font-size: 14px; margin-bottom: 20px;">
-      แสดงขนาด Lot หาก EA ต้องเปิดไม้แก้ตามระยะ Step Point
+      แสดงขนาด Lot หาก EA ต้องเปิดไม้แก้ตามระยะ Step Point ด้วย Lot ที่คำนวณได้
     </p>
     <table>
       <thead>
         <tr>
           <th>ออเดอร์ที่ (ไม้)</th>
+          <th>ระยะจากจุดเข้า (Pts)</th>
           <th>ขนาด Lot ที่เปิด</th>
-          <th>รวม Lot สะสมทั้งหมด</th>
+          <th>รวม Lot สะสม</th>
         </tr>
       </thead>
       <tbody id="sim-table-body">
       </tbody>
       <tfoot>
         <tr class="total-row">
-          <td id="max-order-text">รวม (Max 8 ไม้)</td>
+          <td colspan="2" id="max-order-text">รวม (Max 8 ไม้)</td>
           <td>-</td>
           <td id="total-lot-display">0.00</td>
         </tr>
@@ -214,13 +220,40 @@
   </div>
 
   <script>
-    function calculateTolerance(equity, startLot, multiply, stepPoint, slPercent, maxOrders) {
+    // ฟังก์ชันคำนวณหา Lot เริ่มต้นที่เหมาะสมที่สุดจากระยะทนลากเป้าหมาย
+    function findOptimalLot(equity, targetTolerance, multiply, stepPoint, slPercent, maxOrders) {
+      let slAmount = equity * (slPercent / 100);
+      let lossMultiplier = 0;
+      let currentLotMult = 1;
+      let orderDistance = 0;
+      let numOrders = 0;
+
+      // จำลองการลากเพื่อหาตัวคูณการขาดทุนรวม
+      while(orderDistance <= targetTolerance && numOrders < maxOrders) {
+          lossMultiplier += currentLotMult * (targetTolerance - orderDistance);
+          if (numOrders >= 0) { // ใช้ระบบไม้ถัดไปคูณ
+              currentLotMult = currentLotMult * multiply;
+          }
+          orderDistance += stepPoint;
+          numOrders++;
+      }
+
+      if (lossMultiplier === 0) return 0.01; // ป้องกันหารด้วย 0
+      
+      let optimalLot = slAmount / lossMultiplier;
+      // ปัดเศษลง 2 ตำแหน่ง และบังคับขั้นต่ำที่ 0.01
+      let finalLot = Math.floor(optimalLot * 100) / 100;
+      return Math.max(0.01, finalLot);
+    }
+
+    // ฟังก์ชันจำลองว่าด้วย Lot เท่านี้ ทนลากได้ลึกสุดจริงๆ เท่าไหร่
+    function calculateActualTolerance(equity, startLot, multiply, stepPoint, slPercent, maxOrders) {
       let slAmount = equity * (slPercent / 100);
       let currentPoints = 0;
       let loss = 0;
-      let stepSize = 1; 
+      let stepSize = 10; // ขยับทีละ 10 จุดเพื่อความแม่นยำ
       
-      while(loss < slAmount && currentPoints < 50000) { 
+      while(loss <= slAmount && currentPoints < 100000) { 
          currentPoints += stepSize;
          loss = 0;
          let lot = startLot;
@@ -229,65 +262,71 @@
          
          while(orderDistance <= currentPoints && numOrders < maxOrders) {
              loss += lot * (currentPoints - orderDistance); 
-             
              if (numOrders >= 1) { 
                  lot = parseFloat((lot * multiply).toFixed(2));
              }
-             
              orderDistance += stepPoint;
              numOrders++;
          }
       }
-      return currentPoints.toLocaleString(); 
+      return (currentPoints - stepSize).toLocaleString(); 
     }
 
     function calculateMM() {
-      const equityInput = document.getElementById('equity');
-      const equity = parseFloat(equityInput.value);
+      const equity = parseFloat(document.getElementById('equity').value);
+      const targetTolerance = parseFloat(document.getElementById('tolerance').value);
       
-      if(isNaN(equity) || equity < 500) {
-        alert("กรุณาระบุเงินทุนขั้นต่ำ 500 USD ครับ");
+      if(isNaN(equity) || equity < 100) {
+        alert("กรุณาระบุเงินทุนให้ถูกต้องครับ");
+        return;
+      }
+      if(isNaN(targetTolerance) || targetTolerance < 500) {
+        alert("กรุณาระบุเป้าหมายระยะทนลากขั้นต่ำ 500 Pts ครับ");
         return;
       }
 
-      let lotCons = Math.max(0.01, (equity / 2500) * 0.01);
-      let lotBal = Math.max(0.01, (equity / 1000) * 0.01);
-      let lotAgg = Math.max(0.01, (equity / 500) * 0.01);
+      // 1. หาค่า Lot เริ่มต้นที่เหมาะสม
+      let lotCons = findOptimalLot(equity, targetTolerance, 1.20, 2000, 5, 6);
+      let lotBal = findOptimalLot(equity, targetTolerance, 1.20, 1500, 10, 8);
+      let lotAgg = findOptimalLot(equity, targetTolerance, 1.25, 1000, 20, 10);
 
       document.getElementById('cons-lot').innerText = lotCons.toFixed(2);
       document.getElementById('bal-lot').innerText = lotBal.toFixed(2);
       document.getElementById('agg-lot').innerText = lotAgg.toFixed(2);
 
-      // --- อัปเดตพารามิเตอร์ให้ล้อกันทั้ง 3 สาย ---
-      let tolCons = calculateTolerance(equity, lotCons, 1.20, 2000, 5, 6);
-      let tolBal = calculateTolerance(equity, lotBal, 1.20, 1500, 10, 8);
-      let tolAgg = calculateTolerance(equity, lotAgg, 1.25, 1000, 20, 10);
+      // 2. หาค่าทนลากจริง (เนื่องจาก Lot ถูกปัดเศษลง ระยะจริงอาจจะได้ไกลกว่าเป้าหมายเล็กน้อย)
+      let actualTolCons = calculateActualTolerance(equity, lotCons, 1.20, 2000, 5, 6);
+      let actualTolBal = calculateActualTolerance(equity, lotBal, 1.20, 1500, 10, 8);
+      let actualTolAgg = calculateActualTolerance(equity, lotAgg, 1.25, 1000, 20, 10);
 
-      document.getElementById('cons-tol').innerText = tolCons + " Pts";
-      document.getElementById('bal-tol').innerText = tolBal + " Pts";
-      document.getElementById('agg-tol').innerText = tolAgg + " Pts";
+      document.getElementById('cons-tol').innerText = actualTolCons + " Pts";
+      document.getElementById('bal-tol').innerText = actualTolBal + " Pts";
+      document.getElementById('agg-tol').innerText = actualTolAgg + " Pts";
 
-      // อัปเดตตาราง Grid ให้แสดงของสายสมดุล (8 ไม้)
-      generateSimulationTable(lotBal, 1.20, 8);
+      // 3. แสดงตาราง Grid ของสายสมดุล
+      generateSimulationTable(lotBal, 1.20, 1500, 8);
     }
 
-    function generateSimulationTable(startLot, multiply, maxOrders) {
+    function generateSimulationTable(startLot, multiply, stepPoint, maxOrders) {
       const tbody = document.getElementById('sim-table-body');
       tbody.innerHTML = ''; 
       
       let currentLot = parseFloat(startLot.toFixed(2));
       let totalLot = 0;
+      let currentDistance = 0;
 
       for(let i = 1; i <= maxOrders; i++) {
         totalLot += currentLot;
         let row = `<tr>
           <td>ไม้ที่ ${i}</td>
+          <td>${currentDistance.toLocaleString()}</td>
           <td>${currentLot.toFixed(2)}</td>
           <td>${totalLot.toFixed(2)}</td>
         </tr>`;
         tbody.innerHTML += row;
         
-        if (i >= 2) {
+        currentDistance += stepPoint;
+        if (i >= 1) {
             currentLot = parseFloat((currentLot * multiply).toFixed(2));
         }
       }

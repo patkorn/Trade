@@ -76,7 +76,6 @@
     }
     input[type="number"]:focus { outline: none; border-color: #00d2ff; }
     
-    /* เน้นช่อง Custom Lot ให้ต่างจากช่องอื่น */
     #customLot { border-color: #ff9800; background-color: #2a2015; }
     #customLot:focus { border-color: #ffb74d; }
 
@@ -125,6 +124,7 @@
     .aggressive h3 { color: #f44336; }
     .stat { display: flex; justify-content: space-between; margin: 8px 0; padding-bottom: 5px; border-bottom: 1px dashed #333; font-size: 14px;}
     .stat.tolerance { border-bottom: none; margin-top: 15px; background-color: rgba(255, 255, 255, 0.05); padding: 10px; border-radius: 5px; font-weight: bold; }
+    .stat-extra { color: #00d2ff; font-weight: bold; }
     .highlight { font-size: 32px; font-weight: bold; text-align: center; margin: 15px 0 5px 0; color: #fff; }
     .lot-label { text-align: center; font-size: 12px; margin-bottom: 15px; color: #aaa; background-color: #333; padding: 4px; border-radius: 4px; display: inline-block; width: 100%; box-sizing: border-box;}
     .lot-label.manual { background-color: #4a3311; color: #ffb74d; }
@@ -182,6 +182,8 @@
       <div class="stat"><span>Step Point:</span> <span>1,500 Pts</span></div>
       <div class="stat"><span>Max Orders:</span> <span>6 ไม้</span></div>
       <div class="stat"><span>Stop Loss:</span> <span>5%</span></div>
+      <div class="stat stat-extra"><span>Main Order Point:</span> <span id="cons-main">1,000 Pts</span></div>
+      <div class="stat stat-extra"><span>TL Start:</span> <span id="cons-tl">1,500 Pts</span></div>
       <div class="stat tolerance"><span style="color: #4caf50;">ทนลากได้สูงสุดจริง:</span> <span id="cons-tol">0 Pts</span></div>
     </div>
 
@@ -193,6 +195,8 @@
       <div class="stat"><span>Step Point:</span> <span>1,000 Pts</span></div>
       <div class="stat"><span>Max Orders:</span> <span>8 ไม้</span></div>
       <div class="stat"><span>Stop Loss:</span> <span>10%</span></div>
+      <div class="stat stat-extra"><span>Main Order Point:</span> <span id="bal-main">1,000 Pts</span></div>
+      <div class="stat stat-extra"><span>TL Start:</span> <span id="bal-tl">1,000 Pts</span></div>
       <div class="stat tolerance"><span style="color: #ff9800;">ทนลากได้สูงสุดจริง:</span> <span id="bal-tol">0 Pts</span></div>
     </div>
 
@@ -204,16 +208,15 @@
       <div class="stat"><span>Step Point:</span> <span>700 Pts</span></div>
       <div class="stat"><span>Max Orders:</span> <span>10 ไม้</span></div>
       <div class="stat"><span>Stop Loss:</span> <span>20%</span></div>
+      <div class="stat stat-extra"><span>Main Order Point:</span> <span id="agg-main">1,000 Pts</span></div>
+      <div class="stat stat-extra"><span>TL Start:</span> <span id="agg-tl">700 Pts</span></div>
       <div class="stat tolerance"><span style="color: #f44336;">ทนลากได้สูงสุดจริง:</span> <span id="agg-tol">0 Pts</span></div>
     </div>
   </div>
 
   <div class="table-container" id="grid-simulator">
     <h3>📊 จำลองตาราง Grid (อ้างอิงสายสมดุล)</h3>
-    <p style="text-align: center; color: #aaa; font-size: 14px; margin-bottom: 20px;">
-      แสดงขนาด Lot หาก EA ต้องเปิดไม้แก้ตามระยะ Step Point ด้วย Lot ปัจจุบัน
-    </p>
-    <table>
+    <table id="sim-table">
       <thead>
         <tr>
           <th>ออเดอร์ที่ (ไม้)</th>
@@ -222,8 +225,7 @@
           <th>รวม Lot สะสม</th>
         </tr>
       </thead>
-      <tbody id="sim-table-body">
-      </tbody>
+      <tbody id="sim-table-body"></tbody>
       <tfoot>
         <tr class="total-row">
           <td colspan="2" id="max-order-text">รวม (Max 8 ไม้)</td>
@@ -244,47 +246,27 @@
 
       while(orderDistance <= targetTolerance && numOrders < maxOrders) {
           lossMultiplier += currentLotMult * (targetTolerance - orderDistance);
-          if (numOrders >= 0) { 
-              currentLotMult = currentLotMult * multiply;
-          }
+          currentLotMult = currentLotMult * multiply;
           orderDistance += stepPoint;
           numOrders++;
       }
-
       if (lossMultiplier === 0) return 0.01; 
-      
       let optimalLot = slAmount / lossMultiplier;
-      let finalLot;
-      
-      if (roundingMode === 'floor') {
-          finalLot = Math.floor(optimalLot * 100) / 100;
-      } else if (roundingMode === 'ceil') {
-          finalLot = Math.ceil(optimalLot * 100) / 100;
-      } else {
-          finalLot = Math.round(optimalLot * 100) / 100;
-      }
-
+      let finalLot = roundingMode === 'floor' ? Math.floor(optimalLot * 100) / 100 : 
+                     roundingMode === 'ceil' ? Math.ceil(optimalLot * 100) / 100 : Math.round(optimalLot * 100) / 100;
       return Math.max(0.01, finalLot);
     }
 
     function calculateActualTolerance(equity, startLot, multiply, stepPoint, slPercent, maxOrders) {
       let slAmount = equity * (slPercent / 100);
-      let currentPoints = 0;
-      let loss = 0;
-      let stepSize = 10; 
-      
+      let currentPoints = 0, loss = 0, stepSize = 10; 
       while(loss <= slAmount && currentPoints < 100000) { 
          currentPoints += stepSize;
          loss = 0;
-         let lot = startLot;
-         let orderDistance = 0;
-         let numOrders = 0; 
-         
+         let lot = startLot, orderDistance = 0, numOrders = 0; 
          while(orderDistance <= currentPoints && numOrders < maxOrders) {
              loss += lot * (currentPoints - orderDistance); 
-             if (numOrders >= 1) { 
-                 lot = parseFloat((lot * multiply).toFixed(2));
-             }
+             if (numOrders >= 1) lot = parseFloat((lot * multiply).toFixed(2));
              orderDistance += stepPoint;
              numOrders++;
          }
@@ -295,39 +277,23 @@
     function calculateMM() {
       const equity = parseFloat(document.getElementById('equity').value);
       const targetTolerance = parseFloat(document.getElementById('tolerance').value);
-      const customLotInput = document.getElementById('customLot').value;
-      const customLot = parseFloat(customLotInput);
-      
+      const customLot = parseFloat(document.getElementById('customLot').value);
       const isManualLot = !isNaN(customLot) && customLot > 0;
       
-      if(isNaN(equity) || equity < 100) {
-        alert("กรุณาระบุเงินทุนให้ถูกต้องครับ");
-        return;
-      }
-      if(!isManualLot && (isNaN(targetTolerance) || targetTolerance < 500)) {
-        alert("หากไม่กำหนด Lot เอง กรุณาระบุเป้าหมายระยะทนลากขั้นต่ำ 500 Pts ครับ");
-        return;
-      }
-
+      const stepCons = 1500, stepBal = 1000, stepAgg = 700;
       let lotCons, lotBal, lotAgg;
 
       if (isManualLot) {
-          lotCons = customLot;
-          lotBal = customLot;
-          lotAgg = customLot;
-          
-          const labels = document.querySelectorAll('.lot-label');
-          labels.forEach(label => {
+          lotCons = lotBal = lotAgg = customLot;
+          document.querySelectorAll('.lot-label').forEach(label => {
               label.innerText = "⭐ ฟิกซ์ Lot ตามผู้ใช้กำหนด";
               label.classList.add('manual');
           });
       } else {
-          lotCons = findOptimalLot(equity, targetTolerance, 1.2, 1500, 5, 6, 'floor');
-          lotBal = findOptimalLot(equity, targetTolerance, 1.2, 1000, 10, 8, 'round');
-          lotAgg = findOptimalLot(equity, targetTolerance, 1.3, 700, 20, 10, 'ceil');
-          
-          const labels = document.querySelectorAll('.lot-label');
-          labels.forEach(label => {
+          lotCons = findOptimalLot(equity, targetTolerance, 1.2, stepCons, 5, 6, 'floor');
+          lotBal = findOptimalLot(equity, targetTolerance, 1.2, stepBal, 10, 8, 'round');
+          lotAgg = findOptimalLot(equity, targetTolerance, 1.3, stepAgg, 20, 10, 'ceil');
+          document.querySelectorAll('.lot-label').forEach(label => {
               label.innerText = "คำนวณจากเป้าทนลาก (ออโต้)";
               label.classList.remove('manual');
           });
@@ -337,48 +303,37 @@
       document.getElementById('bal-lot').innerText = lotBal.toFixed(2);
       document.getElementById('agg-lot').innerText = lotAgg.toFixed(2);
 
-      let actualTolCons = calculateActualTolerance(equity, lotCons, 1.2, 1500, 5, 6);
-      let actualTolBal = calculateActualTolerance(equity, lotBal, 1.2, 1000, 10, 8);
-      let actualTolAgg = calculateActualTolerance(equity, lotAgg, 1.3, 700, 20, 10);
+      // แก้ไขส่วน Main Order Point ขั้นต่ำเป็น 1,000 จุด
+      document.getElementById('cons-main').innerText = Math.max(1000, stepCons * 5).toLocaleString() + " Pts";
+      document.getElementById('bal-main').innerText = Math.max(1000, stepBal * 5).toLocaleString() + " Pts";
+      document.getElementById('agg-main').innerText = Math.max(1000, stepAgg * 5).toLocaleString() + " Pts";
 
-      document.getElementById('cons-tol').innerText = actualTolCons + " Pts";
-      document.getElementById('bal-tol').innerText = actualTolBal + " Pts";
-      document.getElementById('agg-tol').innerText = actualTolAgg + " Pts";
+      document.getElementById('cons-tl').innerText = Math.max(500, stepCons).toLocaleString() + " Pts";
+      document.getElementById('bal-tl').innerText = Math.max(500, stepBal).toLocaleString() + " Pts";
+      document.getElementById('agg-tl').innerText = Math.max(500, stepAgg).toLocaleString() + " Pts";
 
-      generateSimulationTable(lotBal, 1.2, 1000, 8);
+      document.getElementById('cons-tol').innerText = calculateActualTolerance(equity, lotCons, 1.2, stepCons, 5, 6) + " Pts";
+      document.getElementById('bal-tol').innerText = calculateActualTolerance(equity, lotBal, 1.2, stepBal, 10, 8) + " Pts";
+      document.getElementById('agg-tol').innerText = calculateActualTolerance(equity, lotAgg, 1.3, stepAgg, 20, 10) + " Pts";
+
+      generateSimulationTable(lotBal, 1.2, stepBal, 8);
     }
 
     function generateSimulationTable(startLot, multiply, stepPoint, maxOrders) {
       const tbody = document.getElementById('sim-table-body');
       tbody.innerHTML = ''; 
-      
-      let currentLot = parseFloat(startLot.toFixed(2));
-      let totalLot = 0;
-      let currentDistance = 0;
-
+      let currentLot = parseFloat(startLot.toFixed(2)), totalLot = 0, currentDistance = 0;
       for(let i = 1; i <= maxOrders; i++) {
         totalLot += currentLot;
-        let row = `<tr>
-          <td>ไม้ที่ ${i}</td>
-          <td>${currentDistance.toLocaleString()}</td>
-          <td>${currentLot.toFixed(2)}</td>
-          <td>${totalLot.toFixed(2)}</td>
-        </tr>`;
-        tbody.innerHTML += row;
-        
+        tbody.innerHTML += `<tr><td>ไม้ที่ ${i}</td><td>${currentDistance.toLocaleString()}</td><td>${currentLot.toFixed(2)}</td><td>${totalLot.toFixed(2)}</td></tr>`;
         currentDistance += stepPoint;
-        if (i >= 1) {
-            currentLot = parseFloat((currentLot * multiply).toFixed(2));
-        }
+        if (i >= 1) currentLot = parseFloat((currentLot * multiply).toFixed(2));
       }
-
       document.getElementById('max-order-text').innerText = `รวม (Max ${maxOrders} ไม้)`;
       document.getElementById('total-lot-display').innerText = totalLot.toFixed(2);
       document.getElementById('grid-simulator').style.display = 'block';
     }
-
     window.onload = calculateMM;
   </script>
-
 </body>
 </html>

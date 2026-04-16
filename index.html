@@ -162,8 +162,8 @@
     </div>
     <div class="input-box">
       <label for="tolerance">เป้าหมายทนลาก (Pts)</label>
-      <span class="label-desc">คำนวณออโต้ตามระยะ</span>
-      <input type="number" id="tolerance" placeholder="เช่น 1000" value="1000">
+      <span class="label-desc">ปล่อยว่าง = ใช้ค่ามาตรฐาน 1,000</span>
+      <input type="number" id="tolerance" placeholder="เช่น 1000">
     </div>
     <div class="input-box">
       <label for="customLot" style="color: #ff9800;">ฟิกซ์ Lot เอง (ไม่บังคับ)</label>
@@ -183,7 +183,7 @@
       <div class="stat"><span>Max Orders:</span> <span>6 ไม้</span></div>
       <div class="stat"><span>Stop Loss:</span> <span>5%</span></div>
       <div class="stat stat-extra"><span>Main Order Point:</span> <span id="cons-main">1,000 Pts</span></div>
-      <div class="stat stat-extra"><span>TL Start:</span> <span id="cons-tl">1,500 Pts</span></div>
+      <div class="stat stat-extra"><span>TL Start:</span> <span id="cons-tl">500 Pts</span></div>
       <div class="stat tolerance"><span style="color: #4caf50;">ทนลากได้สูงสุดจริง:</span> <span id="cons-tol">0 Pts</span></div>
     </div>
 
@@ -196,7 +196,7 @@
       <div class="stat"><span>Max Orders:</span> <span>8 ไม้</span></div>
       <div class="stat"><span>Stop Loss:</span> <span>10%</span></div>
       <div class="stat stat-extra"><span>Main Order Point:</span> <span id="bal-main">1,000 Pts</span></div>
-      <div class="stat stat-extra"><span>TL Start:</span> <span id="bal-tl">1,000 Pts</span></div>
+      <div class="stat stat-extra"><span>TL Start:</span> <span id="bal-tl">500 Pts</span></div>
       <div class="stat tolerance"><span style="color: #ff9800;">ทนลากได้สูงสุดจริง:</span> <span id="bal-tol">0 Pts</span></div>
     </div>
 
@@ -209,7 +209,7 @@
       <div class="stat"><span>Max Orders:</span> <span>10 ไม้</span></div>
       <div class="stat"><span>Stop Loss:</span> <span>20%</span></div>
       <div class="stat stat-extra"><span>Main Order Point:</span> <span id="agg-main">1,000 Pts</span></div>
-      <div class="stat stat-extra"><span>TL Start:</span> <span id="agg-tl">700 Pts</span></div>
+      <div class="stat stat-extra"><span>TL Start:</span> <span id="agg-tl">500 Pts</span></div>
       <div class="stat tolerance"><span style="color: #f44336;">ทนลากได้สูงสุดจริง:</span> <span id="agg-tol">0 Pts</span></div>
     </div>
   </div>
@@ -276,9 +276,22 @@
 
     function calculateMM() {
       const equity = parseFloat(document.getElementById('equity').value);
-      const targetTolerance = parseFloat(document.getElementById('tolerance').value);
+      const toleranceRaw = document.getElementById('tolerance').value;
       const customLot = parseFloat(document.getElementById('customLot').value);
+      
       const isManualLot = !isNaN(customLot) && customLot > 0;
+      const isManualTol = toleranceRaw.trim() !== '' && !isNaN(parseFloat(toleranceRaw)) && parseFloat(toleranceRaw) > 0;
+      
+      const calcTolerance = isManualTol ? parseFloat(toleranceRaw) : 1000;
+      
+      if(isNaN(equity) || equity < 100) {
+        alert("กรุณาระบุเงินทุนให้ถูกต้องครับ (ขั้นต่ำ 100)");
+        return;
+      }
+
+      // ระบบตัดสินใจเรื่อง Main Order และ TL Start ใหม่
+      const mainOrderVal = isManualTol ? (calcTolerance * 2) : 1000;
+      const tlStartVal = isManualTol ? calcTolerance : 500;
       
       const stepCons = 1500, stepBal = 1000, stepAgg = 700;
       let lotCons, lotBal, lotAgg;
@@ -290,9 +303,9 @@
               label.classList.add('manual');
           });
       } else {
-          lotCons = findOptimalLot(equity, targetTolerance, 1.2, stepCons, 5, 6, 'floor');
-          lotBal = findOptimalLot(equity, targetTolerance, 1.2, stepBal, 10, 8, 'round');
-          lotAgg = findOptimalLot(equity, targetTolerance, 1.3, stepAgg, 20, 10, 'ceil');
+          lotCons = findOptimalLot(equity, calcTolerance, 1.2, stepCons, 5, 6, 'floor');
+          lotBal = findOptimalLot(equity, calcTolerance, 1.2, stepBal, 10, 8, 'round');
+          lotAgg = findOptimalLot(equity, calcTolerance, 1.3, stepAgg, 20, 10, 'ceil');
           document.querySelectorAll('.lot-label').forEach(label => {
               label.innerText = "คำนวณจากเป้าทนลาก (ออโต้)";
               label.classList.remove('manual');
@@ -303,14 +316,14 @@
       document.getElementById('bal-lot').innerText = lotBal.toFixed(2);
       document.getElementById('agg-lot').innerText = lotAgg.toFixed(2);
 
-      // แก้ไขส่วน Main Order Point ขั้นต่ำเป็น 1,000 จุด
-      document.getElementById('cons-main').innerText = Math.max(1000, stepCons * 5).toLocaleString() + " Pts";
-      document.getElementById('bal-main').innerText = Math.max(1000, stepBal * 5).toLocaleString() + " Pts";
-      document.getElementById('agg-main').innerText = Math.max(1000, stepAgg * 5).toLocaleString() + " Pts";
+      // อัปเดต Main Order Point และ TL Start ให้ตรงกับเงื่อนไขใหม่
+      document.getElementById('cons-main').innerText = mainOrderVal.toLocaleString() + " Pts";
+      document.getElementById('bal-main').innerText = mainOrderVal.toLocaleString() + " Pts";
+      document.getElementById('agg-main').innerText = mainOrderVal.toLocaleString() + " Pts";
 
-      document.getElementById('cons-tl').innerText = Math.max(500, stepCons).toLocaleString() + " Pts";
-      document.getElementById('bal-tl').innerText = Math.max(500, stepBal).toLocaleString() + " Pts";
-      document.getElementById('agg-tl').innerText = Math.max(500, stepAgg).toLocaleString() + " Pts";
+      document.getElementById('cons-tl').innerText = tlStartVal.toLocaleString() + " Pts";
+      document.getElementById('bal-tl').innerText = tlStartVal.toLocaleString() + " Pts";
+      document.getElementById('agg-tl').innerText = tlStartVal.toLocaleString() + " Pts";
 
       document.getElementById('cons-tol').innerText = calculateActualTolerance(equity, lotCons, 1.2, stepCons, 5, 6) + " Pts";
       document.getElementById('bal-tol').innerText = calculateActualTolerance(equity, lotBal, 1.2, stepBal, 10, 8) + " Pts";
@@ -333,6 +346,8 @@
       document.getElementById('total-lot-display').innerText = totalLot.toFixed(2);
       document.getElementById('grid-simulator').style.display = 'block';
     }
+    
+    // สั่งรันออโต้เมื่อเปิดหน้าเว็บ (จะใช้ค่าเริ่มต้น Default ที่วางไว้)
     window.onload = calculateMM;
   </script>
 </body>
